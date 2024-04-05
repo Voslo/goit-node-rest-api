@@ -1,6 +1,7 @@
-const HttpError = require('../helpers/HttpError');
-const contactsSchema = require('../schemas/contactsSchemas');
-const {listContacts, getContactById, addContact, deleteContact, updateContact} = require('../services/contactsServices.js')
+import HttpError from '../helpers/HttpError.js';
+import contactsSchema from '../schemas/contactsSchemas.js';
+import {addContact, deleteContact, getContactById, listContacts, updateContact} from '../services/contactsServices.js';
+
 export const getAllContacts = async (req, res) => {
     try {
     const contacts = await listContacts()
