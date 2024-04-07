@@ -1,93 +1,46 @@
-import fs from 'fs/promises';
-import path from 'path';
-import HttpError from '../helpers/HttpError';
-import { createContactSchema, updateContactSchema } from '../schemas/contactsSchemas';
+import { addContact, getContactById, listContacts, removeContact, updateContactById } from "../services/contactsServices.js";
 
-const contactsPath = path.join(__dirname, '..', 'db', 'contacts.json');
+export const getAllContacts = async(req, res, next) => {
+   const getUsers = await listContacts();
+    res.status(200).json(getUsers);
+};
 
-async function readContactsFile() {
-  const data = await fs.readFile(contactsPath);
-  return JSON.parse(data);
+export const getOneContact = async(req, res) => {
+    const { id } = req.params;
+    const contact = await getContactById(id);
+    
+  if (!contact) {
+   res.status(404).json({"message": "Not found"})
+    }
+  res.status(200).json(contact)
+};
+
+export const deleteContact = async(req, res) => {
+    const { id } = req.params;
+    const removedContact = await removeContact(id);
+
+    if (!removedContact) {
+       return res.status(404).json({"message": "Not found"})
+         }
+       res.status(200).json(removedContact)
+};
+
+export const createContact = async(req, res) => {
+
+const createNewContcat = await addContact(req.body);
+
+    res.status(201).json(createNewContcat);
+};
+
+export const updateContact = async(req, res) => {
+const { id } = req.params;
+if (Object.keys(req.body).length === 0) {
+   return res.status(400).json({"message": "Body must have at least one field"})
 }
-
-async function writeContactsFile(contacts) {
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-}
-
-export const getAllContacts = async (req, res, next) => {
-  try {
-    const contacts = await readContactsFile();
-    res.status(200).json(contacts);
-  } catch (error) {
-    next(error);
-  }
+const updateContacts = await updateContactById(id, req.body);
+if (!updateContacts) {
+   return res.status(404).json({"message": "Not found"})
 };
 
-export const getOneContact = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const contacts = await readContactsFile();
-    const contact = contacts.find(contact => contact.id === id);
-    if (!contact) {
-      throw HttpError(404, "Not found");
-    }
-    res.status(200).json(contact);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteContact = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const contacts = await readContactsFile();
-    const index = contacts.findIndex(contact => contact.id === id);
-    if (index === -1) {
-      throw HttpError(404, "Not found");
-    }
-    const [deletedContact] = contacts.splice(index, 1);
-    await writeContactsFile(contacts);
-    res.status(200).json(deletedContact);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const createContact = async (req, res, next) => {
-  const { name, email, phone } = req.body;
-  try {
-    const validationResult = createContactSchema.validate({ name, email, phone });
-    if (validationResult.error) {
-      throw HttpError(400, validationResult.error.message);
-    }
-    const contacts = await readContactsFile();
-    const newContact = { id: Date.now().toString(), name, email, phone };
-    contacts.push(newContact);
-    await writeContactsFile(contacts);
-    res.status(201).json(newContact);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateContact = async (req, res, next) => {
-  const { id } = req.params;
-  const updateData = req.body;
-  try {
-    const validationResult = updateContactSchema.validate(updateData);
-    if (validationResult.error) {
-      throw HttpError(400, validationResult.error.message);
-    }
-    const contacts = await readContactsFile();
-    const index = contacts.findIndex(contact => contact.id === id);
-    if (index === -1) {
-      throw HttpError(404, "Not found");
-    }
-    const updatedContact = { ...contacts[index], ...updateData };
-    contacts[index] = updatedContact;
-    await writeContactsFile(contacts);
-    res.status(200).json(updatedContact);
-  } catch (error) {
-    next(error);
-  }
+res.status(200).json(updateContacts);
 };
