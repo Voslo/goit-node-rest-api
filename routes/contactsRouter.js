@@ -8,7 +8,8 @@ import {
   updateStatus 
 } from "../controllers/contactsControllers.js";
 import { createContactSchema, favoriteContactSchema, updateContactSchema } from "../schemas/contactsSchemas.js";
-import {validateBody, isValidId} from "../helpers/validateBody.js";
+import validateBody from "../helpers/validateBody.js";
+import isValidId from "../helpers/idValidation.js";
 
 const contactsRouter = express.Router();
 
