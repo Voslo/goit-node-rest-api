@@ -6,15 +6,16 @@ import {
   updateById,
   updateStatusContact,
 } from "../services/contactsServices.js";
+import catchAsync from "../helpers/catchAsync.js";
 import HttpError from "../helpers/HttpError.js";
 
-export const getAllContacts = async (req, res) => {
+export const getAllContacts = catchAsync(async (req, res) => {
   const result = await listContacts();
 
   res.status(200).json(result);
-};
+});
 
-export const getOneContact = async (req, res) => {
+export const getOneContact = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await getContactById(id);
 
@@ -23,9 +24,9 @@ export const getOneContact = async (req, res) => {
   }
 
   res.status(200).json(result);
-};
+});
 
-export const deleteContact = async (req, res) => {
+export const deleteContact = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await removeContact(id);
 
@@ -34,15 +35,15 @@ export const deleteContact = async (req, res) => {
   }
 
   res.status(200).json(result);
-};
+});
 
-export const createContact = async (req, res) => {
+export const createContact = catchAsync(async (req, res) => {
   const result = await addContact(req.body);
 
   res.status(201).json(result);
-};
+});
 
-export const updateContact = async (req, res) => {
+export const updateContact = catchAsync(async (req, res) => {
   if (Object.keys(req.body).length < 1) {
     throw HttpError(400, "Body must have at least one field");
   }
@@ -55,9 +56,9 @@ export const updateContact = async (req, res) => {
   }
 
   res.status(200).json(result);
-};
+});
 
-export const updateStatus = async (req, res) => {
+export const updateStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await updateStatusContact(id, req.body);
 
@@ -66,4 +67,4 @@ export const updateStatus = async (req, res) => {
   }
 
   res.status(200).json(result);
-};
+});

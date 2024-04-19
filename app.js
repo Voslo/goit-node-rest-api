@@ -2,22 +2,28 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-import contactsRouter from "./routes/contactsRouter.js";
 import dotenv from "dotenv";
 
-const app = express();
+import contactsRouter from "./routes/contactsRouter.js";
 
 dotenv.config();
 
+const app = express();
+
+const { MONGODB_URL, PORT = 3000 } = process.env;
+
+mongoose.set("strictQuery", true);
 mongoose
-  .connect(process.env.MONGODB_URL)
+  .connect(MONGODB_URL)
   .then(() => {
-    console.log('Database connection successful');
+    app.listen(PORT);
+    console.log("Database connection successful.");
+    console.log(`port: ${PORT}`);
   })
-  .catch((err) => {
-    console.log(err);
-    process.exit(1)
-  })
+  .catch((error) => {
+    console.log(error.message);
+    process.exit(1);
+  });
 
 app.use(morgan("tiny"));
 app.use(cors());
@@ -32,8 +38,4 @@ app.use((_, res) => {
 app.use((err, req, res, next) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
-});
-
-app.listen(3000, () => {
-  console.log("Server is running. Use our API on port: 3000");
 });
