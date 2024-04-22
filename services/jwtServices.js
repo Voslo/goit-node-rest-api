@@ -5,10 +5,10 @@ import HttpError from "../helpers/HttpError.js";
 
 dotenv.config();
 
-const { JWT_SECRET_KEY, JWT_EXPIRES_IN } = process.env;
+const { SECRET_KEY, EXPIRES_IN } = process.env;
 
 export const loginToken = (id) => {
-  return jwt.sign({ id }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign({ id }, SECRET_KEY, { expiresIn: EXPIRES_IN });
 };
 
 export const checkToken = (token) => {

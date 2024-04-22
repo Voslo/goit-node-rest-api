@@ -1,4 +1,4 @@
-import { Contact } from "../models/contact.js";
+import { Contact } from "../models/contactModel.js";
 
 export async function listContacts(owner) {
   const contacts = await Contact.find({ owner }, "-createdAt -updatedAt");

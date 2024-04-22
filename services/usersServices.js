@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 
-import { User } from "../models/user.js";
+import { User } from "../models/userModel.js";
 
 export async function register(data) {
   const user = await User.create(data);
