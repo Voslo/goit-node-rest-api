@@ -36,7 +36,7 @@ export const loginUser = catchAsync(async (req, res) => {
   const passwordCompare = await checkPassword(email, password);
 
   if (!user || !passwordCompare) {
-    throw HttpError(401, "Unauthorized");
+    throw HttpError(401, "Email or password is wrong");    
   }
 
   const token = loginToken(user._id);
