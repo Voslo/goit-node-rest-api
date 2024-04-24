@@ -33,10 +33,14 @@ export const registerUser = catchAsync(async (req, res) => {
 export const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await checkEmail(email);
-  const passwordCompare = await checkPassword(email, password);
 
-  if (!user || !passwordCompare) {
-    throw HttpError(401, "Email or password is wrong");    
+  if (!user) {
+    throw HttpError(401, "Email or password is wrong");
+  }
+
+  const passwordCompare = await checkPassword(email, password);
+  if (!passwordCompare) {
+    throw HttpError(401, "Email or password is wrong");
   }
 
   const token = loginToken(user._id);
