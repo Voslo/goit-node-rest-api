@@ -10,25 +10,28 @@ import {
 } from "../services/usersServices.js";
 import { loginToken } from "../services/jwtServices.js";
 
-export const registerUser = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await checkEmail(email);
-
+export const registerUser = async (req, res) => {
+  const { email } = req.body;
+  const user = await authServices.findUser({ email });
   if (user) {
-    throw HttpError(409, "Email in use");
+    throw HttpError(409, 'Email in use');
   }
+  const avatarURL = gravatar.url(email);
 
   const hashPassword = await generateHash(password);
 
-  const result = await register({ ...req.body, password: hashPassword });
+  const newUser = await register({ ...req.body, avatarURL, password: hashPassword });
 
+  if (!newUser) {
+    throw HttpError(404, 'Not found');
+  }
   res.status(201).json({
     user: {
-      email: result.email,
-      subscription: result.subscription,
+      email: newUser.email,
+      subscription: newUser.subscription,
     },
   });
-});
+};
 
 export const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -71,3 +74,21 @@ export const getCurrent = catchAsync(async (req, res) => {
     subscription,
   });
 });
+
+export const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+
+  const newPath = path.join(avatarsPath, filename);
+
+  Jimp.read(oldPath, (err, img) => {
+    if (err) throw err;
+    img.resize(250, 250).write(newPath);
+  });
+
+  await fs.rename(oldPath, newPath);
+
+  const avatarURL = path.join('avatars', filename);
+  await authServices.setAvatar(_id, avatarURL);
+  return res.json({ avatarURL });
+};
