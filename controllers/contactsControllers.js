@@ -10,14 +10,16 @@ import catchAsync from "../helpers/catchAsync.js";
 import HttpError from "../helpers/HttpError.js";
 
 export const getAllContacts = catchAsync(async (req, res) => {
-  const result = await listContacts();
+  const { _id: owner } = req.user;
+  const result = await listContacts(owner);
 
   res.status(200).json(result);
 });
 
 export const getOneContact = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await getContactById(id);
+  const { _id: owner } = req.user;
+  const result = await getContactById(id, owner);
 
   if (!result) {
     throw HttpError(404, "Not Found");
@@ -28,7 +30,8 @@ export const getOneContact = catchAsync(async (req, res) => {
 
 export const deleteContact = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await removeContact(id);
+  const { _id: owner } = req.user;
+  const result = await removeContact(id, owner);
 
   if (!result) {
     throw HttpError(404, "Not Found");
@@ -38,7 +41,8 @@ export const deleteContact = catchAsync(async (req, res) => {
 });
 
 export const createContact = catchAsync(async (req, res) => {
-  const result = await addContact(req.body);
+  const { _id: owner } = req.user;
+  const result = await addContact(req.body, owner);
 
   res.status(201).json(result);
 });
@@ -49,7 +53,8 @@ export const updateContact = catchAsync(async (req, res) => {
   }
 
   const { id } = req.params;
-  const result = await updateById(id, req.body);
+  const { _id: owner } = req.user;
+  const result = await updateById(id, owner, req.body);
 
   if (!result) {
     throw HttpError(404, "Not Found");
@@ -60,7 +65,8 @@ export const updateContact = catchAsync(async (req, res) => {
 
 export const updateStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await updateStatusContact(id, req.body);
+  const { _id: owner } = req.user;
+  const result = await updateStatusContact(id, owner, req.body);
 
   if (!result) {
     throw HttpError(404, "Not Found");
