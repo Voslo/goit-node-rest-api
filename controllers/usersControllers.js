@@ -1,5 +1,6 @@
 import catchAsync from "../helpers/catchAsync.js";
 import HttpError from "../helpers/HttpError.js";
+import gravatar from 'gravatar';
 import {
   register,
   checkEmail,
@@ -9,10 +10,11 @@ import {
   deleteToken,
 } from "../services/usersServices.js";
 import { loginToken } from "../services/jwtServices.js";
+import { User } from "../models/userModel.js";
 
 export const registerUser = async (req, res) => {
-  const { email } = req.body;
-  const user = await authServices.findUser({ email });
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
   if (user) {
     throw HttpError(409, 'Email in use');
   }
