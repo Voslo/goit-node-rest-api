@@ -11,7 +11,7 @@ import {
 } from "../services/usersServices.js";
 import { loginToken } from "../services/jwtServices.js";
 import { User } from "../models/userModel.js";
-
+import path from "path";
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -78,6 +78,10 @@ export const getCurrent = catchAsync(async (req, res) => {
 });
 
 export const updateAvatar = async (req, res) => {
+   if (!req.file) {
+   throw HttpError(400, "No file provided");
+  }
+
   const { _id } = req.user;
   const { path: oldPath, filename } = req.file;
 
