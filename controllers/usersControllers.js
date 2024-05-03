@@ -78,12 +78,13 @@ export const getCurrent = catchAsync(async (req, res) => {
 });
 
 export const updateAvatar = async (req, res) => {
-   if (!req.file) {
+  if (!req.body.file) {
    throw HttpError(400, "No file provided");
   }
 
   const { _id } = req.user;
   const { path: oldPath, filename } = req.file;
+  const avatarsPath = path.resolve('public', 'avatars');
 
   const newPath = path.join(avatarsPath, filename);
 
