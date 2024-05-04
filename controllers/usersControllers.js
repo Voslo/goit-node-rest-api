@@ -8,10 +8,11 @@ import {
   checkPassword,
   saveToken,
   deleteToken,
+  updateAvatarImage
 } from "../services/usersServices.js";
 import { loginToken } from "../services/jwtServices.js";
 import { User } from "../models/userModel.js";
-import path from "path";
+
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -77,25 +78,16 @@ export const getCurrent = catchAsync(async (req, res) => {
   });
 });
 
-export const updateAvatar = async (req, res) => {
-  if (!req.body.file) {
-   throw HttpError(400, "No file provided");
-  }
-
-  const { _id } = req.user;
-  const { path: oldPath, filename } = req.file;
-  const avatarsPath = path.resolve('public', 'avatars');
-
-  const newPath = path.join(avatarsPath, filename);
-
-  Jimp.read(oldPath, (err, img) => {
-    if (err) throw err;
-    img.resize(250, 250).write(newPath);
-  });
-
-  await fs.rename(oldPath, newPath);
-
-  const avatarURL = path.join('avatars', filename);
-  await authServices.setAvatar(_id, avatarURL);
-  return res.json({ avatarURL });
-};
+export const updateAvatar = async(req, res, next) => {
+  try {
+    const user = await updateAvatarImage(req.user, req.file);
+    if (!req.file) {
+      throw HttpError(400, "No file provided");
+    }
+    return res.json({
+         user,
+     }); 
+    } catch(error) {
+        next(error);
+      }
+}

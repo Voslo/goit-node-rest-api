@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-
+import Jimp from "jimp";
 import { User } from "../models/userModel.js";
 
 export async function register(data) {
@@ -39,5 +39,15 @@ export async function deleteToken(id) {
   return result;
 }
 
-export const setAvatar = (id, avatarURL) =>
-  User.findOneAndUpdate(id, { avatarURL });
+export const updateAvatarImage = async(user, file) => {
+  const id = user.id;
+
+  const lenna = await Jimp.read(file.path);
+  await lenna.resize(250, 250).write(`${id}`)
+
+  user.avatarURL = file.path.replace('public', '');
+
+  const currentUser = await User.findByIdAndUpdate(id, user, { new: true });
+
+  return currentUser;
+}
