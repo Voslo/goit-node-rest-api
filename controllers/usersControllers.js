@@ -1,5 +1,6 @@
 import catchAsync from "../helpers/catchAsync.js";
 import HttpError from "../helpers/HttpError.js";
+import gravatar from 'gravatar';
 import {
   register,
   checkEmail,
@@ -7,28 +8,33 @@ import {
   checkPassword,
   saveToken,
   deleteToken,
+  updateAvatarImage
 } from "../services/usersServices.js";
 import { loginToken } from "../services/jwtServices.js";
+import { User } from "../models/userModel.js";
 
-export const registerUser = catchAsync(async (req, res) => {
+export const registerUser = async (req, res) => {
   const { email, password } = req.body;
-  const user = await checkEmail(email);
-
+  const user = await User.findOne({ email });
   if (user) {
-    throw HttpError(409, "Email in use");
+    throw HttpError(409, 'Email in use');
   }
+  const avatarURL = gravatar.url(email);
 
   const hashPassword = await generateHash(password);
 
-  const result = await register({ ...req.body, password: hashPassword });
+  const newUser = await register({ ...req.body, avatarURL, password: hashPassword });
 
+  if (!newUser) {
+    throw HttpError(404, 'Not found');
+  }
   res.status(201).json({
     user: {
-      email: result.email,
-      subscription: result.subscription,
+      email: newUser.email,
+      subscription: newUser.subscription,
     },
   });
-});
+};
 
 export const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -71,3 +77,17 @@ export const getCurrent = catchAsync(async (req, res) => {
     subscription,
   });
 });
+
+export const updateAvatar = async(req, res, next) => {
+  try {
+    const user = await updateAvatarImage(req.user, req.file);
+    if (!req.file) {
+      throw HttpError(400, "No file provided");
+    }
+    return res.json({
+         user,
+     }); 
+    } catch(error) {
+        next(error);
+      }
+}
