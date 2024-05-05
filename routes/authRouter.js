@@ -1,27 +1,45 @@
-import express from "express";
+import { Router } from "express";
 
-import validateBody from "../helpers/validateBody.js";
-import { registerUserSchema, loginUserSchema } from "../schemas/userSchemas.js";
 import {
-  registerUser,
-  loginUser,
-  logoutUser,
+  checkLoginData,
+  checkRegisterData,
+  protect,
+} from "../middelwares/authMiddelwares.js";
+import {
+  getAllUsers,
   getCurrent,
-  updateAvatar
-} from "../controllers/usersControllers.js";
-import authenticate from "../middlewares/authMiddlewares.js";
-import upload from "../middlewares/upload.js";
+  login,
+  logout,
+  register,
+  updateAvatar,
+  verificationToken,
+  verify,
+} from "../controllers/userControllers.js";
+import validateBody from "../helpers/validateBody.js";
+import { loginUserSchema, registerUserSchema } from "../schemas/usersSchema.js";
+import { multerUpload } from "../middelwares/userMiddelware.js";
 
-const authRouter = express.Router();
+const router = Router();
 
-authRouter.post("/register", validateBody(registerUserSchema), registerUser);
+router.get("/", protect, getAllUsers);
 
-authRouter.post("/login", validateBody(loginUserSchema), loginUser);
+router.get("/current", protect, getCurrent);
 
-authRouter.post("/logout", authenticate, logoutUser);
+router.post(
+  "/register",
+  checkRegisterData,
+  validateBody(registerUserSchema),
+  register
+);
 
-authRouter.get("/current", authenticate, getCurrent);
+router.post("/login", checkLoginData, validateBody(loginUserSchema), login);
 
-authRouter.patch('/avatars', authenticate, upload.single('avatar'), updateAvatar);
+router.post("/logout", protect, logout);
 
-export default authRouter;
+router.patch("/avatars", protect, multerUpload, updateAvatar);
+
+router.get("/verify/:verificationToken", verificationToken);
+
+router.post("/verify", verify);
+
+export default router;

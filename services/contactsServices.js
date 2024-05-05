@@ -1,38 +1,46 @@
 import { Contact } from "../models/contactModel.js";
 
-export async function listContacts(owner) {
-  const contacts = await Contact.find({ owner }, "-createdAt -updatedAt");
-  return contacts;
+async function listContacts(owner) {
+  const contact = await Contact.find({ owner }, "-createdAt -updatedAt");
+  return contact;
 }
 
-export async function getContactById(contactId, owner) {
-  const contact = await Contact.findOne({
-    _id: contactId,
-    owner: owner,
-  });
+async function getContactById(contactId, owner) {
+  const contact = await Contact.findOne({ _id: contactId, owner: owner });
   return contact || null;
 }
 
-export async function removeContact(contactId, owner) {
-  const deletedContact = await Contact.findOneAndDelete({
+async function removeContact(contactId, owner) {
+  const contactToRemove = await Contact.findOneAndDelete({
     _id: contactId,
     owner: owner,
   });
-  return deletedContact;
+  return contactToRemove;
 }
 
-export async function addContact(data, owner) {
-  const newContact = await Contact.create({ ...data, owner });
-  return newContact;
+async function addContact(data, owner) {
+  const newContacts = await Contact.create({ ...data, owner });
+  return newContacts;
 }
 
-export async function updateById(contactId, owner, data) {
+async function updateContactById(contactId, updateData, owner) {
   const updatedContact = await Contact.findOneAndUpdate(
     {
       _id: contactId,
       owner: owner,
     },
-    data,
+    updateData,
+    { new: true }
+  );
+  return updatedContact;
+}
+async function updateStatusContact(contactId, updateData, owner) {
+  const updatedContact = await Contact.findOneAndUpdate(
+    {
+      _id: contactId,
+      owner: owner,
+    },
+    updateData,
     {
       new: true,
     }
@@ -40,16 +48,11 @@ export async function updateById(contactId, owner, data) {
   return updatedContact;
 }
 
-export async function updateStatusContact(contactId, owner, body) {
-  const updatedContact = await Contact.findOneAndUpdate(
-    {
-      _id: contactId,
-      owner: owner,
-    },
-    body,
-    {
-      new: true,
-    }
-  );
-  return updatedContact;
-}
+export {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContactById,
+  updateStatusContact,
+};

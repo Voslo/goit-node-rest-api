@@ -6,28 +6,26 @@ import dotenv from "dotenv";
 
 import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
+import { globalErrorHandler } from "./controllers/errorController.js";
 
 dotenv.config();
 
 const app = express();
 
-const { MONGODB_URL, PORT = 3000 } = process.env;
-
-mongoose.set("strictQuery", true);
 mongoose
-  .connect(MONGODB_URL)
+  .connect(process.env.MONGODB_URL)
   .then(() => {
-    app.listen(PORT);
-    console.log("Database connection successful.");
+    console.log("Database connection successful");
   })
   .catch((error) => {
-    console.log(error.message);
+    console.error("Database connection error:", error);
     process.exit(1);
   });
 
+app.use(express.json());
 app.use(morgan("tiny"));
 app.use(cors());
-app.use(express.json());
+app.use(express.static("public"));
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", authRouter);
@@ -39,4 +37,11 @@ app.use((_, res) => {
 app.use((err, req, res, next) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
+});
+
+app.use(globalErrorHandler);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running. Use our API on port: ${PORT}`);
 });

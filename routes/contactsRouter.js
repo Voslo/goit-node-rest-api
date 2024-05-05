@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   getAllContacts,
   getOneContact,
@@ -8,33 +7,33 @@ import {
   updateContact,
   updateStatus,
 } from "../controllers/contactsControllers.js";
-import validateBody from "../helpers/validateBody.js";
+import { isValidId } from "../helpers/isValidId.js";
 import {
   createContactSchema,
   updateContactSchema,
   updateStatusSchema,
 } from "../schemas/contactsSchemas.js";
-import isValidId from "../helpers/isValid.js";
-import authenticate from "../middlewares/authMiddlewares.js";
+import validateBody from "../helpers/validateBody.js";
+import { protect } from "../middelwares/authMiddelwares.js";
 
 const contactsRouter = express.Router();
 
-contactsRouter.get("/", authenticate, getAllContacts);
+contactsRouter.get("/", protect, getAllContacts);
 
-contactsRouter.get("/:id", authenticate, isValidId, getOneContact);
+contactsRouter.get("/:id", protect, isValidId, getOneContact);
 
-contactsRouter.delete("/:id", authenticate, isValidId, deleteContact);
+contactsRouter.delete("/:id", protect, isValidId, deleteContact);
 
 contactsRouter.post(
   "/",
-  authenticate,
+  protect,
   validateBody(createContactSchema),
   createContact
 );
 
 contactsRouter.put(
   "/:id",
-  authenticate,
+  protect,
   isValidId,
   validateBody(updateContactSchema),
   updateContact
@@ -42,7 +41,7 @@ contactsRouter.put(
 
 contactsRouter.patch(
   "/:id/favorite",
-  authenticate,
+  protect,
   isValidId,
   validateBody(updateStatusSchema),
   updateStatus
