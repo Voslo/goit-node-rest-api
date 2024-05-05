@@ -10,7 +10,7 @@ import {
   updateAvatar
 } from "../controllers/usersControllers.js";
 import authenticate from "../middlewares/authMiddlewares.js";
-import upload from "../middlewares/upload.js";
+import { multerUpload } from "../middlewares/multerUpload.js";
 
 const authRouter = express.Router();
 
@@ -22,6 +22,6 @@ authRouter.post("/logout", authenticate, logoutUser);
 
 authRouter.get("/current", authenticate, getCurrent);
 
-authRouter.patch('/avatars', authenticate, upload.single('avatar'), updateAvatar);
+authRouter.patch('/avatars', authenticate, multerUpload, updateAvatar);
 
 export default authRouter;

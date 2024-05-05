@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import Jimp from "jimp";
+import { ImageService } from "../middlewares/upload.js";
 import { User } from "../models/userModel.js";
 
 export async function register(data) {
@@ -39,15 +39,19 @@ export async function deleteToken(id) {
   return result;
 }
 
-export const updateAvatarImage = async(user, file) => {
+export const updateAvatarImage = async (user, file) => {
   const id = user.id;
 
-  const lenna = await Jimp.read(file.path);
-  await lenna.resize(250, 250).write(`${id}`)
-
-  user.avatarURL = file.path.replace('public', '');
+  user.avatarURL = await ImageService.saveImage(
+    file,
+    {
+      width: 250,
+      height: 250,
+    },
+    "avatars"
+  );
 
   const currentUser = await User.findByIdAndUpdate(id, user, { new: true });
 
-  return currentUser;
-}
+  return await currentUser.save();
+};

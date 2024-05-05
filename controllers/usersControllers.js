@@ -78,16 +78,13 @@ export const getCurrent = catchAsync(async (req, res) => {
   });
 });
 
-export const updateAvatar = async(req, res, next) => {
-  try {
-    const user = await updateAvatarImage(req.user, req.file);
-    if (!req.file) {
-      throw HttpError(400, "No file provided");
-    }
-    return res.json({
-         user,
-     }); 
-    } catch(error) {
-        next(error);
-      }
-}
+export const updateAvatar = catchAsync(async (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "File is required" });
+  }
+  const user = await updateAvatarImage(req.user, req.file);
+
+  res.status(200).json({
+    avatarURL: user.avatarURL,
+  });
+});
