@@ -13,7 +13,7 @@ export class ImageService {
       if (file.mimetype.startsWith("image/")) {
         callback(null, true);
       } else {
-        callback(new HttpError(400, "Please, upload images only..."), false);
+        throw new HttpError(400, "Please, upload images only...");
       }
     };
     return multer({
